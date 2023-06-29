@@ -7,9 +7,16 @@ import { UsersModule } from './users/users.module';
 import { PostsService } from './posts/posts.service';
 import { PostsController } from './posts/posts.controller';
 import { PostsModule } from './posts/posts.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import * as dotenv from 'dotenv';
+dotenv.config();
 
 @Module({
-  imports: [UsersModule, PostsModule],
+  imports: [
+    MongooseModule.forRoot(process.env.MONGODB_URL),
+    UsersModule,
+    PostsModule,
+  ],
   controllers: [AppController, UsersController, PostsController],
   providers: [AppService, UsersService, PostsService],
 })
