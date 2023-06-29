@@ -8,7 +8,6 @@ import { PostsService } from './posts.service';
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: Post.name, schema: PostSchema }]),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
   ],
   controllers: [PostsController],
   providers: [PostsService],
