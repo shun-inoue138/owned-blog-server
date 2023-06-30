@@ -13,15 +13,23 @@ export class PostsService {
   ) {}
 
   async create(createPostDto: CreatePostDto): Promise<PostDocument> {
-    const postToCreate = new this.postModel(createPostDto);
-    // TODO:トランザクション張る
-    const newPost = await postToCreate.save();
-    const user = await this.usersService.findOne(createPostDto.user);
-    // TODO:pushの引数はnewPost._idであるべき？
-    user.posts.push(newPost);
-    await user.save();
+    const session = await this.postModel.db.startSession();
+    session.startTransaction();
+    try {
+      const postToCreate = new this.postModel(createPostDto);
+      const newPost = await postToCreate.save();
+      const user = await this.usersService.findOne(createPostDto.user);
+      // TODO:pushの引数はnewPost._idであるべき？
+      user.posts.push(newPost);
+      await user.save();
 
-    return newPost;
+      return newPost;
+    } catch {
+      await session.abortTransaction();
+      throw new Error('create post failed');
+    } finally {
+      session.endSession();
+    }
   }
 
   async findAll(): Promise<PostDocument[]> {
