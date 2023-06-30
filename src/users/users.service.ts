@@ -6,14 +6,14 @@ import { Model } from 'mongoose';
 @Injectable()
 export class UsersService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
-  getUsers(): Promise<UserDocument[]> {
+  findAll(): Promise<UserDocument[]> {
     return this.userModel.find().exec();
   }
-  getUser(id): Promise<UserDocument> {
+  findOne(id): Promise<UserDocument> {
     return this.userModel.findById(id).exec();
   }
 
-  createUser(): Promise<UserDocument> {
+  signUp(): Promise<UserDocument> {
     const userToCreate = new this.userModel({
       name: 'test1',
       email: 'hoge@fuga.com',

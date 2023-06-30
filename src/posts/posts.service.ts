@@ -14,13 +14,14 @@ export class PostsService {
 
   async create(createPostDto: CreatePostDto): Promise<PostDocument> {
     const postToCreate = new this.postModel(createPostDto);
-    const res = await postToCreate.save();
-
-    const user = await this.usersService.getUser(createPostDto.user);
-    user.posts.push(postToCreate);
+    // TODO:トランザクション張る
+    const newPost = await postToCreate.save();
+    const user = await this.usersService.findOne(createPostDto.user);
+    // TODO:pushの引数はnewPost._idであるべき？
+    user.posts.push(newPost);
     await user.save();
 
-    return res;
+    return newPost;
   }
 
   async findAll(): Promise<PostDocument[]> {
