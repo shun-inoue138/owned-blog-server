@@ -11,8 +11,8 @@ export class UsersController {
     return this.usersService.findAll();
   }
 
-  @Post('create')
-  create(): Promise<UserDocument> {
+  @Post('sign-up')
+  signUp(): Promise<UserDocument> {
     return this.usersService.signUp();
   }
 

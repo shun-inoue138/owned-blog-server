@@ -17,7 +17,7 @@ export class PostsController {
     return this.postsService.findOne(id);
   }
 
-  @Post('create')
+  @Post()
   create(@Body() createPostDto: CreatePostDto): Promise<PostDocument> {
     return this.postsService.create(createPostDto);
   }
