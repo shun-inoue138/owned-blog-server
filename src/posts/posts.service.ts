@@ -24,8 +24,10 @@ export class PostsService {
       await user.save();
 
       return newPost;
-    } catch {
+    } catch (err) {
       await session.abortTransaction();
+      console.log({ err });
+
       throw new Error('create post failed');
     } finally {
       session.endSession();
