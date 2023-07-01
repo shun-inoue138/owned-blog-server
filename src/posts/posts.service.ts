@@ -16,6 +16,10 @@ export class PostsService {
     const session = await this.postModel.db.startSession();
     session.startTransaction();
     try {
+      // 画像処理、エラーが出たらロールバック
+      // if (createPostDto.image) {
+      //   createPostDto.image = saveImage(createPostDto.image);
+      // }
       const postToCreate = new this.postModel(createPostDto);
       const newPost = await postToCreate.save();
       const user = await this.usersService.findOne(createPostDto.user);
@@ -31,6 +35,15 @@ export class PostsService {
       throw new Error('create post failed');
     } finally {
       session.endSession();
+    }
+  }
+
+  async delete(id: string): Promise<void> {
+    try {
+      await this.postModel.findByIdAndDelete(id).exec();
+    } catch (error) {
+      console.log({ error });
+      throw new Error('delete post failed');
     }
   }
 
