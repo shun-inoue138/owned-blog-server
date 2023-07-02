@@ -1,7 +1,7 @@
 export class CreatePostDto {
   title: string;
   content: string;
-  image: string;
+  image?: Express.Multer.File | undefined;
   isPrivate: boolean;
   user: string;
 }
