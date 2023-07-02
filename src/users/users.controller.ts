@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { UserDocument } from './schema';
 import { UsersService } from './users.service';
 
@@ -12,8 +12,22 @@ export class UsersController {
   }
 
   @Post('sign-up')
-  signUp(): Promise<UserDocument> {
-    return this.usersService.signUp();
+  signUp(
+    @Body('name') name: string,
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ): Promise<{ user: UserDocument; token: string }> {
+    console.log('signUp');
+
+    return this.usersService.signUp(name, email, password);
+  }
+
+  @Post('sign-in')
+  signIn(
+    @Body('email') email: string,
+    @Body('password') password: string,
+  ): Promise<{ user: UserDocument; token: string }> {
+    return this.usersService.signIn(email, password);
   }
 
   @Get(':id')
