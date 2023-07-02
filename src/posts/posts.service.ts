@@ -18,12 +18,10 @@ export class PostsService {
   async create(createPostDto: CreatePostDto): Promise<PostDocument> {
     const session = await this.postModel.db.startSession();
     session.startTransaction();
+    let fileName;
     try {
       // TODO:server側のローカルディレクトリに画像を保存するという手法は特殊なため、この辺りの処理はもっと抽象化したい
-      let fileName;
       if (createPostDto.image) {
-        console.log('image is exist');
-
         fileName = this.saveImage(createPostDto.image);
       }
       const postToCreate = new this.postModel({
@@ -40,9 +38,7 @@ export class PostsService {
       return newPost;
     } catch (err) {
       await session.abortTransaction();
-      //ここで保存した画像を削除する
-      console.log({ err });
-
+      if (fileName) this.undoSaveImage(fileName);
       throw new Error('create post failed');
     } finally {
       session.endSession();
@@ -53,7 +49,6 @@ export class PostsService {
     try {
       await this.postModel.findByIdAndDelete(id).exec();
     } catch (error) {
-      console.log({ error });
       throw new Error('delete post failed');
     }
   }
@@ -83,6 +78,11 @@ export class PostsService {
     fs.writeFileSync(outputPath, image.buffer);
 
     return uniqueFilename;
+  }
+
+  private undoSaveImage(fileName: string): void {
+    const filePath = path.resolve('postImages', fileName);
+    fs.unlinkSync(filePath);
   }
 
   private getImageBase64(post: PostDocument): string {
