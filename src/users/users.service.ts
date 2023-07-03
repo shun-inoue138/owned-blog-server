@@ -34,6 +34,7 @@ export class UsersService {
       }
 
       const token = this.generateToken(user);
+
       return { user, token };
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -69,6 +70,19 @@ export class UsersService {
     }
   }
 
+  async verifyToken(token: string) {
+    const decoded = this.decodeToken(token);
+
+    if (!decoded) {
+      return null;
+    }
+    const user = await this.userModel.findById(decoded.id).exec();
+    if (!user) {
+      return null;
+    }
+    return user;
+  }
+
   private hashPassword(password: string): string {
     const salt = bcrypt.genSaltSync(10);
     return bcrypt.hashSync(password, salt);
@@ -79,19 +93,17 @@ export class UsersService {
   }
 
   private generateToken(user: any): string {
-    console.log('generateToken');
-    try {
-      return this.jwtService.sign({ id: user._id });
-    } catch (error) {
-      console.log(error);
-    }
+    return this.jwtService.sign({ id: user._id });
   }
 
-  private decodeToken(token: string): any {
+  private decodeToken(bearerHeaders: string): null | { id: string } {
+    if (!bearerHeaders) return null;
+    const token = bearerHeaders.split(' ')[1];
+
     try {
       return this.jwtService.verify(token);
     } catch (error) {
-      console.error(error);
+      //tokenがinvalidな場合
       return null;
     }
   }
