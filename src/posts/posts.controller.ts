@@ -18,12 +18,17 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get()
-  getAll(): Promise<PostDocument[]> {
+  findAll(): Promise<PostDocument[]> {
     return this.postsService.findAll();
   }
 
+  @Get('except/private')
+  findAllExceptPrivate(): Promise<PostDocument[]> {
+    return this.postsService.findAllExceptPrivate();
+  }
+
   @Get(':id')
-  getOne(@Param('id') id: string): Promise<PostDocument> {
+  findOne(@Param('id') id: string): Promise<PostDocument> {
     return this.postsService.findOne(id);
   }
 
