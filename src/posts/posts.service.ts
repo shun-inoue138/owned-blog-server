@@ -54,9 +54,29 @@ export class PostsService {
   }
 
   async findAll(): Promise<PostDocument[]> {
-    const posts = await this.postModel.find().populate('user').exec();
+    //updatedAt新しい順
+    const posts = await this.postModel
+      .find()
+      .populate('user')
+      .sort({ createdAt: -1 })
+      .exec();
     console.log({ posts });
 
+    return posts.map((post) => {
+      if (!post.image) return post;
+      post.image = this.getImageBase64(post);
+      return post;
+    });
+  }
+
+  async findAllExceptPrivate(): Promise<PostDocument[]> {
+    console.log('findAllExceptPrivate');
+
+    const posts = await this.postModel
+      .find({ isPrivate: false })
+      .populate('user')
+      .sort({ createdAt: -1 })
+      .exec();
     return posts.map((post) => {
       if (!post.image) return post;
       post.image = this.getImageBase64(post);

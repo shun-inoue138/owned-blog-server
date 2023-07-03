@@ -16,7 +16,7 @@ dotenv.config();
     }),
   ],
   controllers: [UsersController],
-  providers: [UsersService, JwtService],
+  providers: [UsersService],
   exports: [UsersService],
 })
 export class UsersModule {}

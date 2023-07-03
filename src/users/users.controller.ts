@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { UserDocument } from './schema';
 import { UsersService } from './users.service';
 
@@ -33,5 +33,12 @@ export class UsersController {
   @Get(':id')
   getOne(@Param('id') id: string): Promise<UserDocument> {
     return this.usersService.findOne(id);
+  }
+
+  @Post('verify-token')
+  verifyToken(
+    @Headers('authorization') token: string,
+  ): Promise<UserDocument | undefined> {
+    return this.usersService.verifyToken(token);
   }
 }
