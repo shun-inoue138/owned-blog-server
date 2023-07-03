@@ -7,6 +7,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import * as path from 'path';
 import * as fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import { EditPostDto } from './dto/edit-post.dto';
 
 @Injectable()
 export class PostsService {
@@ -45,6 +46,37 @@ export class PostsService {
     }
   }
 
+  async edit(postId: string, editPostDto: EditPostDto): Promise<PostDocument> {
+    const session = await this.postModel.db.startSession();
+    session.startTransaction();
+    // TODO:// TODO:変更があった場合のみserverで受け取る。
+
+    let newFileName;
+    try {
+      if (editPostDto.image) {
+        newFileName = this.saveImage(editPostDto.image);
+      }
+      const postToEdit = await this.postModel.findById(postId).exec();
+      if (!postToEdit) throw new Error('post not found');
+
+      if (newFileName) {
+        postToEdit.image = newFileName;
+      }
+      postToEdit.title = editPostDto.title;
+      postToEdit.content = editPostDto.content;
+      postToEdit.isPrivate = editPostDto.isPrivate;
+
+      await postToEdit.save();
+      return postToEdit;
+    } catch (err) {
+      await session.abortTransaction();
+      if (newFileName) this.undoSaveImage(newFileName);
+      throw new Error('edit post failed');
+    } finally {
+      session.endSession();
+    }
+  }
+
   async delete(id: string): Promise<void> {
     try {
       await this.postModel.findByIdAndDelete(id).exec();
@@ -77,6 +109,23 @@ export class PostsService {
       .populate('user')
       .sort({ createdAt: -1 })
       .exec();
+    return posts.map((post) => {
+      if (!post.image) return post;
+      post.image = this.getImageBase64(post);
+      return post;
+    });
+  }
+
+  async findAllByUser(userId: string): Promise<PostDocument[]> {
+    console.log(typeof userId);
+
+    const posts = await this.postModel
+      .find({ user: userId })
+      .populate('user')
+      .sort({ createdAt: -1 })
+      .exec();
+    console.log({ posts });
+
     return posts.map((post) => {
       if (!post.image) return post;
       post.image = this.getImageBase64(post);
